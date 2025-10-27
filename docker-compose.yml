@@ -19,6 +19,8 @@ services:
       retries: 3
       start_period: 5s
     restart: always
+    env_file:
+      - .env.example
 
   app_green:
     image: ${GREEN_IMAGE}
@@ -38,6 +40,8 @@ services:
       retries: 3
       start_period: 5s
     restart: always
+    env_file:
+      - .env.example
 
   nginx:
     image: nginx:stable-alpine
@@ -55,3 +59,5 @@ services:
       - app_blue
       - app_green
     restart: always
+    env_file:
+      - .env.example
