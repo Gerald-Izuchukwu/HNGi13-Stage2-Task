@@ -1,25 +1,22 @@
-FROM node:18-alpine
+# Use the same base image
+FROM python:3.12-slim
 
-WORKDIR /
+WORKDIR /app
 
-COPY . /
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-RUN npm install
 
-EXPOSE 3000
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["node", "app.js"]
+COPY watcher.py .
 
-# FROM node:18-alpine
+CMD python, /app/watcher.py
 
-# RUN mkdir -p /home/user-auth-service
 
-# COPY . /home/user-auth-service
-
-# WORKDIR /home/user-auth-service
-
-# RUN npm install
-
-# EXPOSE 9602
-
-# CMD [ "node", "app.js"]
+# FROM python:3.12-slim
+# WORKDIR /app
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
+# COPY watcher.py .
+# CMD ["python", "watcher.py"] 

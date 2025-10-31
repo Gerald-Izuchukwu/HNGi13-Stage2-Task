@@ -1,4 +1,6 @@
 version: '3.8'
+volumes:
+  nginx_logs:
 
 services:
   app_blue:
@@ -43,21 +45,229 @@ services:
     env_file:
       - .env.example
 
+# # first
+#   nginx:
+#     image: nginx:stable-alpine
+#     container_name: nginx_proxy
+#     ports:
+#       - "${NGINX_PORT}:80"
+#     volumes:
+#       - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+#       - nginx_logs:/var/log/nginx
+#     environment:
+#       ACTIVE_POOL: ${ACTIVE_POOL}
+#       PORT: ${PORT}
+#     command: /bin/sh -c "BLUE_CONFIG='backup'; GREEN_CONFIG='backup'; if [ \"$$ACTIVE_POOL\" = \"blue\" ]; then BLUE_CONFIG='max_fails=1 fail_timeout=1s'; elif [ \"$$ACTIVE_POOL\" = \"green\" ]; then GREEN_CONFIG='max_fails=10 fail_timeout=10s'; fi; UPSTREAM_SERVERS=\"server app_blue:$$PORT $$BLUE_CONFIG; server app_green:$$PORT $$GREEN_CONFIG;\"; export UPSTREAM_SERVERS; envsubst '$$UPSTREAM_SERVERS $$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+
+#     depends_on:
+#       - app_blue
+#       - app_green
+#     restart: always
+#     env_file:
+#       - .env
+
+# # second
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   container_name: nginx_proxy
+  #   ports:
+  #     - "${NGINX_PORT}:80"
+  #   volumes:
+  #     - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+  #     - nginx_logs:/var/log/nginx
+  #   environment:
+  #     ACTIVE_POOL: ${ACTIVE_POOL}
+  #     PORT: ${PORT}
+  #   command: >
+  #     /bin/sh -c "
+  #     # Remove default symlink and recreate real log file
+  #     rm -f /var/log/nginx/access.log;
+  #     touch /var/log/nginx/access.log;
+  #     chmod 666 /var/log/nginx/access.log;
+  #     BLUE_CONFIG='backup';
+  #     GREEN_CONFIG='backup';
+  #     if [ \"$$ACTIVE_POOL\" = \"blue\" ]; then
+  #       BLUE_CONFIG='max_fails=1 fail_timeout=1s';
+  #     elif [ \"$$ACTIVE_POOL\" = \"green\" ]; then
+  #       GREEN_CONFIG='max_fails=10 fail_timeout=10s';
+  #     fi;
+  #     UPSTREAM_SERVERS=\"server app_blue:$$PORT $$BLUE_CONFIG; server app_green:$$PORT $$GREEN_CONFIG;\";
+  #     export UPSTREAM_SERVERS;
+  #     envsubst '$$UPSTREAM_SERVERS $$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf;
+  #     nginx -g 'daemon off;'
+  #     "
+  #   depends_on:
+  #     - app_blue
+  #     - app_green
+  #   restart: always
+  #   env_file:
+  #     - .env
+
+# third
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   container_name: nginx_proxy
+  #   ports:
+  #     - "${NGINX_PORT}:80"
+  #   volumes:
+  #     - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+  #     - nginx_logs:/var/log/nginx
+  #   environment:
+  #     ACTIVE_POOL: ${ACTIVE_POOL}
+  #     PORT: ${PORT}
+  #   command: >
+  #     /bin/sh -c "
+  #     # Remove the default symlink and create a real log file
+  #     rm -f /var/log/nginx/access.log;
+  #     touch /var/log/nginx/access.log;
+  #     chmod 666 /var/log/nginx/access.log;
+  #     BLUE_CONFIG='backup';
+  #     GREEN_CONFIG='backup';
+  #     if [ \"$$ACTIVE_POOL\" = \"blue\" ]; then
+  #       BLUE_CONFIG='max_fails=1 fail_timeout=1s';
+  #     elif [ \"$$ACTIVE_POOL\" = \"green\" ]; then
+  #       GREEN_CONFIG='max_fails=10 fail_timeout=10s';
+  #     fi;
+  #     UPSTREAM_SERVERS=\"server app_blue:$$PORT $$BLUE_CONFIG; server app_green:$$PORT $$GREEN_CONFIG;\";
+  #     export UPSTREAM_SERVERS;
+  #     envsubst '$$UPSTREAM_SERVERS $$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf;
+  #     nginx -g 'daemon off;'
+  #     "
+  #   depends_on:
+  #     - app_blue
+  #     - app_green
+  #   restart: always
+  #   env_file:
+  #     - .env
+
+  # fourth
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   container_name: nginx_proxy
+  #   ports:
+  #     - "${NGINX_PORT}:80"
+  #   volumes:
+  #     - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+  #     - nginx_logs:/var/log/nginx
+  #   environment:
+  #     ACTIVE_POOL: ${ACTIVE_POOL}
+  #     PORT: ${PORT}
+  #     command: >
+  #       /bin/sh -c "
+  #       rm -f /var/log/nginx/access.log &&
+  #       touch /var/log/nginx/access.log &&
+  #       chmod 666 /var/log/nginx/access.log &&
+  #       BLUE_CONFIG='backup' &&
+  #       GREEN_CONFIG='backup' &&
+  #       if [ \"$ACTIVE_POOL\" = 'blue' ]; then
+  #         BLUE_CONFIG='max_fails=1 fail_timeout=1s';
+  #       elif [ \"$ACTIVE_POOL\" = 'green' ]; then
+  #         GREEN_CONFIG='max_fails=10 fail_timeout=10s';
+  #       fi &&
+  #       UPSTREAM_SERVERS=\"server app_blue:$PORT $BLUE_CONFIG; server app_green:$PORT $GREEN_CONFIG;\" &&
+  #       export UPSTREAM_SERVERS &&
+  #       envsubst '$UPSTREAM_SERVERS $PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf &&
+  #       nginx -g 'daemon off;'
+  #       "
+  #   depends_on:
+  #   - app_blue
+  #   - app_green
+  #   restart: always
+  #   env_file:
+  #     - .env
+
+  # fifth
+  # nginx:
+  #   image: nginx:stable-alpine
+  #   container_name: nginx_proxy
+  #   ports:
+  #     - "${NGINX_PORT}:80"
+  #   volumes:
+  #     - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+  #     - nginx_logs:/var/log/nginx
+  #   environment:
+  #     ACTIVE_POOL: ${ACTIVE_POOL}
+  #     PORT: ${PORT}
+  #   command: >
+  #     sh -c '
+  #       # Ensure log file exists and writable
+  #       rm -f /var/log/nginx/access.log &&
+  #       touch /var/log/nginx/access.log &&
+  #       chmod 666 /var/log/nginx/access.log &&
+
+  #       # Configure upstreams dynamically
+  #       BLUE_CONFIG="backup"
+  #       GREEN_CONFIG="backup"
+
+  #       if [ "$ACTIVE_POOL" = "blue" ]; then
+  #         BLUE_CONFIG="max_fails=1 fail_timeout=1s"
+  #       elif [ "$ACTIVE_POOL" = "green" ]; then
+  #         GREEN_CONFIG="max_fails=10 fail_timeout=10s"
+  #       fi
+
+  #       UPSTREAM_SERVERS="server app_blue:$PORT $BLUE_CONFIG; server app_green:$PORT $GREEN_CONFIG;"
+  #       export UPSTREAM_SERVERS
+
+  #       # Render the nginx.conf template
+  #       envsubst "\$UPSTREAM_SERVERS \$PORT" < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf
+
+  #       # Show rendered config for debugging
+  #       echo "--- Rendered Nginx Config ---"
+  #       cat /etc/nginx/conf.d/default.conf
+  #       echo "-----------------------------"
+
+  #       # Start Nginx
+  #       nginx -g "daemon off;"
+  #     '
+  #   depends_on:
+  #     - app_blue
+  #     - app_green
+  #   restart: always
+  #   env_file:
+  #     - .env
+
+  # sixth
   nginx:
     image: nginx:stable-alpine
     container_name: nginx_proxy
     ports:
       - "${NGINX_PORT}:80"
     volumes:
+      # Mount our custom template
       - ./nginx.conf.template:/etc/nginx/templates/nginx.conf.template:ro
+      # Mount our startup script
+      - ./nginx_start.sh:/docker-entrypoint.d/nginx_start.sh:ro
+      # Shared log volume
+      - nginx_logs:/var/log/nginx
+      # ⚠️ Override the default template directory so the built-in envsubst script does nothing
+      - ./empty:/etc/nginx/templates
+
     environment:
       ACTIVE_POOL: ${ACTIVE_POOL}
       PORT: ${PORT}
-    command: /bin/sh -c "BLUE_CONFIG='backup'; GREEN_CONFIG='backup'; if [ \"$$ACTIVE_POOL\" = \"blue\" ]; then BLUE_CONFIG='max_fails=1 fail_timeout=1s'; elif [ \"$$ACTIVE_POOL\" = \"green\" ]; then GREEN_CONFIG='max_fails=1 fail_timeout=1s'; fi; UPSTREAM_SERVERS=\"server app_blue:$$PORT $$BLUE_CONFIG; server app_green:$$PORT $$GREEN_CONFIG;\"; export UPSTREAM_SERVERS; envsubst '$$UPSTREAM_SERVERS $$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
-
     depends_on:
       - app_blue
       - app_green
     restart: always
     env_file:
-      - .env.example
+      - .env
+
+  alert_watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: python:3.12-slim
+    container_name: alert_watcher
+    volumes:
+      - nginx_logs:/var/log/nginx 
+    entrypoint: python /app/watcher.py
+    environment:
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
+      ACTIVE_POOL: ${ACTIVE_POOL}
+      ERROR_RATE_THRESHOLD: ${ERROR_RATE_THRESHOLD}
+      WINDOW_SIZE: ${WINDOW_SIZE}
+      ALERT_COOLDOWN_SEC: ${ALERT_COOLDOWN_SEC}
+      MAINTENANCE_MODE: ${MAINTENANCE_MODE} # For suppressing alerts
+    depends_on:
+      - nginx
+    restart: always

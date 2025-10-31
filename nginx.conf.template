@@ -1,65 +1,25 @@
-# # nginx.conf.template (Revised)
+# Define the custom log format globally
+log_format custom_json escape=json '{'
+    '"time": "$time_local",'
+    '"host": "$remote_addr",'
+    '"request": "$request",'
+    '"status": "$status",'
+    '"body_bytes_sent": "$body_bytes_sent",'
+    '"http_referrer": "$http_referer",'
+    '"http_user_agent": "$http_user_agent",'
+    '"request_time": "$request_time",'
+    '"upstream_addr": "$upstream_addr",'
+    '"upstream_status": "$upstream_status",'
+    '"upstream_response_time": "$upstream_response_time",'
+    '"pool": "$sent_http_x_app_pool",'
+    '"release": "$sent_http_x_release_id"'
+'}';
 
-# # NOTE: The 'set' directives for pool names are not strictly necessary 
-# # for the final blue_green_pool implementation and have been removed/simplified
-# # in the working template to avoid this exact scoping error.
-
-# # The problematic 'set' directives from the previous draft have been removed.
-# # The blue_green_pool now directly references the apps and uses the $PORT and $ACTIVE_POOL
-# # environment variables, which are replaced by envsubst before Nginx starts.
-
-# # ... (Previous commented-out upstream blocks removed for brevity and correctness) ...
-
-# # Use a single upstream for both primary and backup logic
-# upstream blue_green_pool {
-#     # Dynamically set the primary server based on ACTIVE_POOL
-#     # envsubst will replace ${PORT} and ${ACTIVE_POOL} before Nginx runs.
-#     server app_blue:${PORT} $(if test "${ACTIVE_POOL}" = "blue"; then echo "max_fails=1 fail_timeout=1s"; else echo "backup"; fi);
-#     server app_green:${PORT} $(if test "${ACTIVE_POOL}" = "green"; then echo "max_fails=1 fail_timeout=1s"; else echo "backup"; fi);
-# }
-
-# server {
-#     listen 80;
-
-#     # If you needed Nginx variables, they would go here (inside the server block):
-#     # set $my_custom_var "value";
-    
-#     # Tight timeouts
-#     proxy_connect_timeout 500ms;
-#     proxy_send_timeout 500ms;
-#     proxy_read_timeout 1s;
-
-#     # Retry on failure, timeout, and 5xx errors
-#     proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
-#     # Maximum of 2 tries (initial attempt + one retry) ensures the request hits the backup pool
-#     proxy_next_upstream_tries 2;
-#     # Fail the request if the retry takes too long
-#     proxy_next_upstream_timeout 10s; 
-
-#     # Forward headers
-#     proxy_pass_request_headers on;
-    
-#     location / {
-#         # Pass to the combined upstream
-#         proxy_pass http://blue_green_pool;
-#     }
-
-#     location /healthz {
-#         proxy_pass http://blue_green_pool/healthz;
-#     }
-
-#     location /version {
-#         proxy_pass http://blue_green_pool/version;
-#     }
-# }
-
-# ---
-
-# nginx.conf.template
+access_log /var/log/nginx/access.log custom_json; 
+error_log /var/log/nginx/error.log warn;
 
 # Upstream block uses the calculated UPSTREAM_SERVERS variable
 upstream blue_green_pool {
-    # UPSTREAM_SERVERS will be replaced by two clean, valid Nginx 'server' lines
     ${UPSTREAM_SERVERS}
 }
 
@@ -73,17 +33,11 @@ server {
 
     # Enable retries for error, timeout, and 5xx (Required for zero failed requests)
     proxy_next_upstream error timeout http_500 http_502 http_503 http_504;
-    
-    # Maximum of 2 tries (initial attempt + one retry) ensures failover to backup
     proxy_next_upstream_tries 2;
-    
-    # Constraint: A request should not be more than 10 seconds
     proxy_next_upstream_timeout 10s; 
 
-    # Forward all application headers (Required for X-App-Pool, X-Release-Id)
     proxy_pass_request_headers on;
     
-    # Main application routes
     location / {
         proxy_pass http://blue_green_pool;
     }
