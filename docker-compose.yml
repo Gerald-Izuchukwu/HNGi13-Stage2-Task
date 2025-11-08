@@ -253,7 +253,7 @@ services:
       - .env
 
   alert_watcher:
-    # image: ${WATCHER_IMAGE}
+    image: ${WATCHER_IMAGE}
     container_name: alert_watcher
     volumes:
       - nginx_logs:/var/log/nginx 
