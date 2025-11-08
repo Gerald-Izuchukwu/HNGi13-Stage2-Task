@@ -253,10 +253,7 @@ services:
       - .env
 
   alert_watcher:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # image: python:3.12-slim
+    # image: ${WATCHER_IMAGE}
     container_name: alert_watcher
     volumes:
       - nginx_logs:/var/log/nginx 
